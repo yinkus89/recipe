@@ -3,8 +3,9 @@ import { register, login, getProfile } from "../controllers/authController";
 import { authenticate } from "../middlewares/authMiddleware";
 
 const router = express.Router();
+
 router.post("/register", register);
 router.post("/login", login);
-router.get("/profile", authenticate, getProfile);
+router.get("/profile", authenticate, getProfile); // Ensure middleware and controller
 
 export default router;

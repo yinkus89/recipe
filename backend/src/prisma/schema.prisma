@@ -1,4 +1,10 @@
-generator client {
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+ generator client {
   provider = "prisma-client-js"
 }
 
@@ -8,13 +14,14 @@ datasource db {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
-  name     String
-  email    String   @unique
-  password String
-  profilePicture String?
-  recipes  Recipe[]
-  comments Comment[]
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  recipes   Recipe[]  @relation("UserRecipes")
+  favorites Recipe[]  @relation("UserFavorites") // No need for `fields` or `references`
+  comments  Comment[]
 }
 
 model Recipe {
@@ -22,35 +29,39 @@ model Recipe {
   title       String
   description String
   instructions String
+  imageURL    String?
   category    String
-  tags        Tag[]        @relation(references: [id])
-  ingredients Ingredient[]
-  likes       Int          @default(0)
-  comments    Comment[]
+  createdAt   DateTime     @default(now())
   userId      Int
-  user        User         @relation(fields: [userId], references: [id])
-}
-
-model Tag {
-  id    Int      @id @default(autoincrement())
-  name  String   @unique
-  recipes Recipe[]
+  user        User         @relation("UserRecipes", fields: [userId], references: [id])
+  ingredients Ingredient[]
+  tags        Tag[]        @relation("RecipeTags")
+  comments    Comment[]
+  favoritedBy User[]       @relation("UserFavorites") // No need for `fields` or `references`
 }
 
 model Ingredient {
-  id        Int    @id @default(autoincrement())
-  name      String
-  quantity  Float
-  unit      String
-  recipeId  Int
-  recipe    Recipe @relation(fields: [recipeId], references: [id])
+  id       Int     @id @default(autoincrement())
+  name     String
+  quantity Float
+  unit     String
+  recipeId Int
+  recipe   Recipe  @relation(fields: [recipeId], references: [id])
+}
+
+model Tag {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  recipes Recipe[] @relation("RecipeTags")
 }
 
 model Comment {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   text      String
-  recipeId  Int
+  createdAt DateTime @default(now())
   userId    Int
-  recipe    Recipe  @relation(fields: [recipeId], references: [id])
-  user      User    @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  recipeId  Int
+  recipe    Recipe   @relation(fields: [recipeId], references: [id])
 }
+ 

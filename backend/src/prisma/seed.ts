@@ -1,59 +1,65 @@
 import { PrismaClient } from '@prisma/client';
-
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create a user
-  const user = await prisma.user.create({
+  // Create Users
+  const user1 = await prisma.user.create({
     data: {
-      name: 'John Doe',
-      email: 'john@example.com',
-      password: 'hashed_password',
+      name: "John Doe",
+      email: "john@example.com",
+      password: "hashed_password",
     },
   });
 
-  // Create a recipe
+  const user2 = await prisma.user.create({
+    data: {
+      name: "Jane Smith",
+      email: "jane@example.com",
+      password: "hashed_password",
+    },
+  });
+
+  // Create Tags
+  const tag1 = await prisma.tag.create({ data: { name: "Vegan" } });
+  const tag2 = await prisma.tag.create({ data: { name: "Dessert" } });
+
+  // Create Recipe
   const recipe = await prisma.recipe.create({
     data: {
-      title: 'Spaghetti Bolognese',
-      description: 'A classic Italian pasta dish.',
-      instructions: 'Cook spaghetti. Make sauce. Combine and serve.',
-      category: 'Italian',
-      userId: user.id,
-      ingredients: {
-        create: [
-          { name: 'Spaghetti', quantity: 200, unit: 'grams' },
-          { name: 'Ground Beef', quantity: 500, unit: 'grams' },
-          { name: 'Tomato Sauce', quantity: 300, unit: 'ml' },
-        ],
-      },
-      tags: {
-        create: [{ name: 'Pasta' }, { name: 'Comfort Food' }],
-      },
+      title: "Vegan Chocolate Cake",
+      description: "A rich and moist vegan chocolate cake.",
+      instructions: "Mix, bake, and enjoy!",
+      category: "Dessert",
+      userId: user1.id,
+      tags: { connect: [{ id: tag1.id }, { id: tag2.id }] },
     },
   });
 
-  // Add a comment
+  // Add Ingredients
+  await prisma.ingredient.createMany({
+    data: [
+      { name: "Flour", quantity: 2, unit: "cups", recipeId: recipe.id },
+      { name: "Cocoa Powder", quantity: 0.5, unit: "cup", recipeId: recipe.id },
+    ],
+  });
+
+  // Add Comments
   await prisma.comment.create({
     data: {
-      text: 'This recipe is fantastic!',
-      userId: user.id,
+      text: "This is amazing!",
+      userId: user2.id,
       recipeId: recipe.id,
     },
   });
 
-  // Add recipe to user's favorites
-  await prisma.recipe.update({
-    where: { id: recipe.id },
-    data: {
-      favoritedBy: {
-        connect: { id: user.id },
-      },
-    },
-  });
+  console.log("Database seeded!");
 }
 
 main()
-  .then(() => console.log('Database seeded successfully!'))
-  .catch((e) => console.error(e))
-  .finally(() => prisma.$disconnect());
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
