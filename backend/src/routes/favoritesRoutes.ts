@@ -1,10 +1,21 @@
-// backend/src/routes/favorites.ts
+// src/routes/favoriteRoutes.ts
 import { Router } from "express";
-import { getFavorites } from "controllers/favoriteController";
+import { authenticateUser } from "../middlewares/authenticateUser";
+import {
+  getFavorites,
+  addFavorite,
+  removeFavorite,
+} from "../controllers/favoriteController";
 
 const router = Router();
 
-// Define route for fetching favorite recipes
-router.get("/favorites", getFavorites);
+// Route to get all favorites
+router.get("/", authenticateUser, getFavorites);
+
+// Route to add a favorite
+router.post("/add", authenticateUser, addFavorite);
+
+// Route to remove a favorite
+router.delete("/remove/:recipeId", authenticateUser, removeFavorite);
 
 export default router;
