@@ -1,97 +1,57 @@
-import React, { useState } from "react";
-import { createRecipe } from "../api";
-import "../styles/tailwind.css";
+import React, { useState } from 'react';
+import axios from 'axios';
 
 const RecipeForm: React.FC = () => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [instructions, setInstructions] = useState("");
-  const [category, setCategory] = useState("");
-  const [imageURL, setImageURL] = useState("");
-  const [userId, setUserId] = useState(1); // Example default userId
+  const [title, setTitle] = useState('');
+  const [ingredients, setIngredients] = useState('');
+  const [steps, setSteps] = useState('');
+  const [highlightCreateRecipe, setHighlightCreateRecipe] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const recipeData = {
-      title,
-      description,
-      instructions,
-      category,
-      imageURL,
-      userId,
-    };
-    await createRecipe(recipeData);
-    alert("Recipe created successfully!");
+    try {
+      await axios.post('http://localhost:5000/api/recipes', { title, ingredients, steps });
+      window.location.href = '/recipes';
+    } catch (error) {
+      console.error('Error creating recipe:', error);
+    }
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-6">
-      <h2 className="text-3xl font-semibold text-gray-800 mb-6 text-center">
+    <form onSubmit={handleSubmit} className="p-4 bg-white rounded shadow-md">
+      <h2 className={`text-2xl font-semibold mb-6 ${highlightCreateRecipe ? 'text-green-500' : ''}`}>
         Create Recipe
       </h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <input
-            type="text"
-            placeholder="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div>
-          <textarea
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
-          />
-        </div>
-        <div>
-          <textarea
-            placeholder="Instructions"
-            value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
-          />
-        </div>
-        <div>
-          <input
-            type="text"
-            placeholder="Category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div>
-          <input
-            type="text"
-            placeholder="Image URL"
-            value={imageURL}
-            onChange={(e) => setImageURL(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div>
-          <input
-            type="number"
-            placeholder="User ID"
-            value={userId}
-            onChange={(e) => setUserId(Number(e.target.value))}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div>
-          <button
-            type="submit"
-            className="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Create Recipe
-          </button>
-        </div>
-      </form>
-    </div>
+      <label>Title:</label>
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="w-full p-2 mb-4 border border-gray-300 rounded"
+      />
+      <label>Ingredients:</label>
+      <input
+        type="text"
+        value={ingredients}
+        onChange={(e) => setIngredients(e.target.value)}
+        className="w-full p-2 mb-4 border border-gray-300 rounded"
+      />
+      <label>Steps:</label>
+      <input
+        type="text"
+        value={steps}
+        onChange={(e) => setSteps(e.target.value)}
+        className="w-full p-2 mb-4 border border-gray-300 rounded"
+      />
+      <button
+        type="submit"
+        onMouseEnter={() => setHighlightCreateRecipe(true)}
+        onMouseLeave={() => setHighlightCreateRecipe(false)}
+        className="w-full p-2 bg-blue-600 text-white"
+      >
+        Create Recipe
+      </button>
+    </form>
   );
 };
 

@@ -1,67 +1,51 @@
-import React, { useEffect, useState } from "react";
-import { fetchRecipes } from "../api";
-import "../styles/tailwind.css";
-
-interface Recipe {
-  id: number;
-  title: string;
-  description: string;
-  instructions: string;
-  category: string;
-  imageURL: string;
-}
+import React, { useEffect, useState } from 'react';
+import { getRecipes, Recipe } from '../utils/api';  // Import getRecipes and Recipe from api file
+import RecipeCard from './RecipeCard';  // RecipeCard component to display individual recipe details
 
 const RecipeList: React.FC = () => {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);  // Typed as Recipe[] (array of recipes)
+  const [loading, setLoading] = useState<boolean>(true);  // State to track loading state
+  const [error, setError] = useState<string>('');  // State to track error message
 
   useEffect(() => {
-    const getRecipes = async () => {
-      setLoading(true);
-      setError(null); // Reset any previous errors
+    const fetchRecipes = async () => {
       try {
-        const data = await fetchRecipes();
-        setRecipes(data);
-      } catch (err) {
-        setError("Error fetching recipes.");
-        console.error("Error fetching recipes:", err);
+        const data = await getRecipes();  // Fetch recipes from the API
+        setRecipes(data);  // Update state with fetched recipes
+      } catch (err: any) {
+        console.error(err);  // Log the error for debugging
+        setError('Error fetching recipes');  // Set error message if the API call fails
       } finally {
-        setLoading(false);
+        setLoading(false);  // Set loading to false once the request is completed
       }
     };
 
-    getRecipes();
-  }, []);
-
-  if (loading) return <div className="text-center py-4">Loading...</div>;
-  if (error) return <div className="text-center py-4 text-red-500">{error}</div>;
+    fetchRecipes();  // Call the fetch function
+  }, []);  // Empty dependency array ensures this runs only once after the initial render
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <h2 className="text-3xl font-semibold text-gray-800 mb-6">Recipes</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {recipes.map((recipe) => (
-          <div
-            key={recipe.id}
-            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
-          >
-            <img
-              src={recipe.imageURL}
-              alt={recipe.title}
-              className="w-full h-48 object-cover rounded-md mb-4"
-            />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              {recipe.title}
-            </h3>
-            <p className="text-gray-600 mb-2">{recipe.description}</p>
-            <p className="text-gray-700 mb-4">{recipe.instructions}</p>
-            <p className="text-sm text-gray-500">
-              <strong>Category:</strong> {recipe.category}
-            </p>
-          </div>
-        ))}
-      </div>
+    <div>
+      <h2>Recipe List</h2>
+
+      {/* Display loading spinner or text while data is being fetched */}
+      {loading && <div className="loading-spinner">Loading...</div>}
+
+      {/* Display error message if there's an issue fetching the data */}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Render recipe cards once data is fetched */}
+      <ul>
+        {recipes.length > 0 ? (
+          recipes.map((recipe) => (
+            <li key={recipe.id}>
+              {/* Pass recipe data to the RecipeCard component */}
+              <RecipeCard recipe={recipe} />
+            </li>
+          ))
+        ) : (
+          <p>No recipes found</p>  // Display this message if no recipes are returned
+        )}
+      </ul>
     </div>
   );
 };

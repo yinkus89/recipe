@@ -1,57 +1,29 @@
-// src/components/RecipeDetails.tsx
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { fetchRecipes } from "../api";
-import "../styles/tailwind.css";
+import React from 'react';
 
-const RecipeDetails: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [recipe, setRecipe] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+interface Recipe {
+  id: string;
+  title: string;
+  imageURL?: string; // Optional in case no image is provided
+  description?: string; // Optional
+  instructions?: string; // Optional
+}
 
-  useEffect(() => {
-    const getRecipe = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const recipeData = await fetchRecipes(); // Fetch from backend
-        const selectedRecipe = recipeData.find((r: any) => r.id === Number(id));
-        if (selectedRecipe) {
-          setRecipe(selectedRecipe);
-        } else {
-          setError("Recipe not found.");
-        }
-      } catch (err) {
-        setError("Error fetching recipe.");
-        console.error("Error fetching recipe:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getRecipe();
-  }, [id]);
-
-  if (loading) return <div className="text-center py-4">Loading...</div>;
-  if (error) return <div className="text-center py-4 text-red-500">{error}</div>;
+const RecipeDetails: React.FC<{ recipe: Recipe | null }> = ({ recipe }) => {
+  if (!recipe) {
+    return <div className="p-4">No recipe details available.</div>;
+  }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-6">
-      <h2 className="text-3xl font-semibold text-gray-800 mb-4">
-        {recipe?.title}
-      </h2>
+    <div className="p-4">
+      <h1 className="text-3xl font-bold">{recipe.title || 'Untitled Recipe'}</h1>
       <img
-        src={recipe?.imageURL}
-        alt={recipe?.title}
-        className="w-full h-64 object-cover rounded-md mb-4"
+        src={recipe.imageURL || 'https://via.placeholder.com/400'}
+        alt={recipe.title || 'Recipe'}
+        className="w-full h-72 object-cover my-4"
       />
-      <p className="text-gray-600 text-lg mb-4">{recipe?.description}</p>
-      <h4 className="text-xl font-semibold text-gray-800 mb-2">
-        Instructions:
-      </h4>
-      <p className="text-gray-600 text-lg">{recipe?.instructions}</p>
+      <p>{recipe.description || 'No description available.'}</p>
+      <h2 className="mt-4 text-2xl font-semibold">Instructions</h2>
+      <p>{recipe.instructions || 'No instructions provided.'}</p>
     </div>
   );
 };

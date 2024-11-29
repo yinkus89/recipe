@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchUsers } from "../api";
+import { fetchUsers } from "../utils/api";
 import "../styles/tailwind.css";
 
 interface User {
@@ -16,13 +16,13 @@ const UserList: React.FC = () => {
   useEffect(() => {
     const getUsers = async () => {
       setLoading(true);
-      setError(null); // Reset any previous errors
+      setError(null);
       try {
         const data = await fetchUsers();
         setUsers(data);
       } catch (err) {
-        setError("Error fetching users.");
-        console.error("Error fetching users:", err);
+        const errorMsg = err.response?.data?.message || "Error fetching users.";
+        setError(errorMsg);
       } finally {
         setLoading(false);
       }

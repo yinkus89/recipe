@@ -1,40 +1,44 @@
-// src/pages/FavoritePage.tsx
-import React, { useState, useEffect } from "react";
-import FavoriteList from "../components/FavoriteList"; // Import FavoriteList component
-import "../styles/tailwind.css";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import FavoriteCard from '../components/FavoriteCard';
 
 const FavoritePage: React.FC = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<any[]>([]);
+  const [highlightedFavoriteId, setHighlightedFavoriteId] = useState<number | null>(null);
 
   useEffect(() => {
-    // Simulate loading of favorites (replace with actual API call if needed)
-    const fetchFavorites = async () => {
-      try {
-        // Simulate a fetch request or make your API call here
-        setLoading(true);
-        setError(null); // Reset any previous errors
-        // await yourApiCallToFetchFavorites();
-      } catch (err) {
-        setError("Error fetching your favorites.");
-        console.error("Error fetching favorites:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFavorites();
+    const token = localStorage.getItem('token');
+    axios.get('http://localhost:5000/api/user/favorites', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(response => setFavorites(response.data))
+      .catch(error => console.error('Error fetching favorites:', error));
   }, []);
 
-  if (loading) return <div className="text-center py-4">Loading your favorites...</div>;
-  if (error) return <div className="text-center py-4 text-red-500">{error}</div>;
+  const handleFavoriteClick = (id: number) => {
+    setHighlightedFavoriteId(id);
+  };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-4xl font-semibold text-gray-900 mb-6">Your Favorites</h1>
-      <FavoriteList />
+    <div className="p-4">
+      <h1 className="text-2xl font-semibold">Your Favorite Recipes</h1>
+      {favorites.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          {favorites.map((favorite) => (
+            <FavoriteCard
+              key={favorite.id}
+              favorite={favorite}
+              isHighlighted={highlightedFavoriteId === favorite.id}
+              onClick={() => handleFavoriteClick(favorite.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        <p>You have no favorite recipes.</p>
+      )}
     </div>
   );
 };
+
 
 export default FavoritePage;
