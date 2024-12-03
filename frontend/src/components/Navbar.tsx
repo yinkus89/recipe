@@ -10,6 +10,8 @@ const Navbar: React.FC = () => {
         <li><Link to="/profile" className="hover:text-gray-300">Profile</Link></li>
         <li><Link to="/login" className="hover:text-gray-300">Login</Link></li>
         <li><Link to="/register" className="hover:text-gray-300">Register</Link></li>
+        <li><Link to="/recipes" className="hover:text-gray-300">Recipes</Link></li>
+        <li><Link to="/create-recipe" className="hover:text-gray-300">Create Recipe</Link></li> {/* New link */}
       </ul>
     </nav>
   );

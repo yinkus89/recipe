@@ -14,8 +14,10 @@
     "sourceMap": true,  // Enable source maps for debugging
     "noImplicitAny": true, // Disallow implicit `any` type
     "strictNullChecks": true, // Enable strict null checks
-    "skipDefaultLibCheck": true // Skip default library check to avoid issues
+    "skipDefaultLibCheck": true, // Skip default library check to avoid issues
+    "noEmit": false,  // Prevent emitting JavaScript files
+    "types": ["node", "express"]  // Explicitly include types for Node.js and Express
   },
-  "include": ["src/**/*.ts"],  // Include all TypeScript files in src
+  "include": ["src/**/*.ts", "src/types/**/*.d.ts"], 
   "exclude": ["node_modules", "dist"]  // Exclude node_modules and dist directories
 }

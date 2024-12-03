@@ -22,6 +22,7 @@ interface RecipeUpdateInput {
 }
 
 // Create Recipe
+
 export const createRecipe = async (
   req: Request,
   res: Response
@@ -29,12 +30,14 @@ export const createRecipe = async (
   const { title, description, instructions, category, imageURL, userId } =
     req.body as RecipeCreateInput;
 
+  // Check for missing fields
   if (!title || !description || !instructions || !category || !userId) {
     res.status(400).json({ error: "Missing required fields" });
     return;
   }
 
   try {
+    // Create the recipe in the database
     const newRecipe = await prisma.recipe.create({
       data: {
         title,
@@ -46,22 +49,25 @@ export const createRecipe = async (
       },
     });
 
+    // Return the created recipe with a success status
     res.status(201).json(newRecipe);
   } catch (error) {
-    res.status(500).json({ error: "Error creating recipe", details: error });
+    console.error("Error creating recipe:", error);
+    res.status(500).json({
+      error: "Error creating recipe",
+      details: error instanceof Error ? error.message : error,
+    });
   } finally {
     await prisma.$disconnect();
   }
 };
 
+
 // Get All Recipes
-export const getRecipes = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getRecipes = async (req: Request, res: Response) => {
   try {
     const recipes = await prisma.recipe.findMany();
-    res.status(200).json(recipes);
+    return recipes;
   } catch (error) {
     res.status(500).json({ error: "Error fetching recipes", details: error });
   } finally {

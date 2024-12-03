@@ -30,37 +30,43 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 };
 
-// Login user
 export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   try {
+    // Step 1: Find user by email
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
+    // If user not found, send an error response and exit
     if (!user) {
-      res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const isMatch = await bcrypt.compare(password, user?.password!);
+    // Step 2: Compare password with hashed password stored in DB
+    const isMatch = await bcrypt.compare(password, user.password);
+    
+    // If passwords don't match, send an error response and exit
     if (!isMatch) {
-      res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // Step 3: Generate JWT token
     const token = jwt.sign(
-      { id: user?.id, name: user?.name, email: user?.email },
-      process.env.JWT_SECRET || "defaultsecretkey",
+      { id: user.id, name: user.name, email: user.email },
+      process.env.JWT_SECRET || "defaultsecretkey", // Ensure you have a secret key
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({ message: "Login successful", token });
+    // Step 4: Send the response with the token
+    return res.status(200).json({ message: "Login successful", token });
+    
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ error: "Server Error" });
+    return res.status(500).json({ error: "Server Error" });
   }
 };
-
 // Logout user (optional)
 export const logoutUser = (req: Request, res: Response) => {
   // Handle logout (clear token, etc.)

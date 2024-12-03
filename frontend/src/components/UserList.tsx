@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchUsers } from "../utils/api";
+import { fetchUsers } from "../utils/api"; // Assuming fetchUsers is a function that makes the API call
 import "../styles/tailwind.css";
 
 interface User {
@@ -13,16 +13,18 @@ const UserList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch users from the API
   useEffect(() => {
     const getUsers = async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchUsers();
-        setUsers(data);
+        const UserData = await fetchUsers();
+        setUsers(users);
       } catch (err) {
         const errorMsg = err.response?.data?.message || "Error fetching users.";
         setError(errorMsg);
+        console.error("Error fetching users:", err); // For debugging purposes
       } finally {
         setLoading(false);
       }
@@ -31,14 +33,17 @@ const UserList: React.FC = () => {
     getUsers();
   }, []);
 
-  if (loading) return <div className="text-center py-4">Loading...</div>;
-  if (error) return <div className="text-center py-4 text-red-500">{error}</div>;
+  if (loading) return <div className="flex justify-center items-center py-4">Loading...</div>;
+  if (error) return <div className="text-center py-4 text-red-500" role="alert">{error}</div>;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h2 className="text-3xl font-semibold text-gray-800 mb-6">Users</h2>
+
       {users.length === 0 ? (
-        <div className="text-center py-4 text-gray-500">No users available</div>
+        <div className="text-center py-4 text-gray-500">
+          No users available
+        </div>
       ) : (
         <ul className="space-y-4">
           {users.map((user) => (

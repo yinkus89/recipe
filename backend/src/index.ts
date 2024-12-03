@@ -1,40 +1,46 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import { PrismaClient } from "@prisma/client";
 import userRoutes from "./routes/userRoutes";
-import recipeRoutes from "./routes/recipeRoutes";
 import authRoutes from "./routes/authRoute";
 import favoritesRoutes from "./routes/favoritesRoutes";
-import { PrismaClient } from "@prisma/client";
-import errorHandler from "./middlewares/errorHandler";
+import { errorHandler } from "./middlewares/errorHandler";
+import recipesRoutes from "./routes/recipeRoutes"; // Fixed import name here
 
-dotenv.config(); // Load environment variables from .env file
+dotenv.config(); // Load environment variables
 
 const app = express();
 const prisma = new PrismaClient();
 
 // Middleware
-app.use(cors());
-app.use(express.json()); // to parse JSON requests
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Restrict CORS to your frontend
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // If you're using cookies or tokens for authentication
+  })
+);
+app.use(express.json()); // Parse JSON bodies for POST requests
 
 // Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/recipes", recipeRoutes);
-app.use("/api/favorites", favoritesRoutes); // Favorites routes for adding/removing/viewing favorites
+app.use("/api/auth", authRoutes); // Auth routes (signup, login)
+app.use("/api/user", userRoutes); // User-related routes
+app.use("/api/recipes", recipesRoutes); // Recipe-related routes
+app.use("/api/favorites", favoritesRoutes); // Favorite recipes routes
 
-// Example route with Prisma interaction
-app.get("/api/recipes", async (req: Request, res: Response) => {
-  try {
-    const recipes = await prisma.recipe.findMany();
-    res.json(recipes);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching recipes" });
-  }
-});
-
-// Error handler middleware
+// Error handler middleware (it should be at the bottom of your routes)
 app.use(errorHandler);
+
+// Check Prisma connection (this is for startup diagnostics)
+prisma
+  .$connect()
+  .then(() => {
+    console.log("Prisma is connected to the database.");
+  })
+  .catch((error) => {
+    console.error("Failed to connect to the database:", error);
+  });
 
 // Start the server
 const port = process.env.PORT || 5000;

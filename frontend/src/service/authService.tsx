@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL for your API (update it based on your backend API URL)
-const API_URL = 'http://localhost:5432/auth';
+const API_URL = 'http://localhost:5000/auth';
 
 // Helper to get token from localStorage
 const getToken = () => localStorage.getItem('token');
@@ -12,7 +12,9 @@ export const registerUser = async (email: string, password: string) => {
     const response = await axios.post(`${API_URL}/register`, { email, password });
     return response.data; // The response may contain user data or success message
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Registration failed');
+    // Handle error more gracefully by checking for missing data
+    const message = error?.response?.data?.message || error.message || 'Registration failed';
+    throw new Error(message);
   }
 };
 
@@ -26,7 +28,8 @@ export const loginUser = async (email: string, password: string) => {
     }
     return token; // Return the JWT token on successful login
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Login failed');
+    const message = error?.response?.data?.message || error.message || 'Login failed';
+    throw new Error(message);
   }
 };
 
@@ -45,7 +48,8 @@ export const getUserProfile = async () => {
     });
     return response.data; // Return user data
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Failed to fetch profile');
+    const message = error?.response?.data?.message || error.message || 'Failed to fetch profile';
+    throw new Error(message);
   }
 };
 
